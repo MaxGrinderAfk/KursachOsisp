@@ -12,7 +12,7 @@ OBJ_DIR = test
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
 OBJ = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
-TARGET = bTreeAlloc
+TARGET = bTreeMemAllocProg
 
 all: $(TARGET)
 
