@@ -27,6 +27,24 @@ void BTree<T>::Node::operator delete(void* ptr, std::size_t /*size*/) {
     SubAllocator::instance().deallocate(ptr);
 }
 
+// Вспомогательный метод для глубокого копирования узла
+template <typename T>
+typename BTree<T>::Node* BTree<T>::Node::clone() const {
+    Node* newNode = new Node(isLeaf);
+    
+    newNode->keys = keys;
+    
+    for (auto child : children) {
+        if (child) {
+            newNode->children.push_back(child->clone());
+        } else {
+            newNode->children.push_back(nullptr);
+        }
+    }
+    
+    return newNode;
+}
+
 template <typename T>
 BTree<T>::BTree(int degree) {
     t = std::max(2, degree);  
@@ -36,6 +54,58 @@ BTree<T>::BTree(int degree) {
 template <typename T>
 BTree<T>::~BTree() {
     delete root;
+}
+
+// Конструктор копирования
+template <typename T>
+BTree<T>::BTree(const BTree& other) : t(other.t) {
+    std::shared_lock<std::shared_mutex> lock(other.tree_mutex);
+    
+    if (other.root) {
+        root = other.root->clone();
+    } else {
+        root = nullptr;
+    }
+}
+
+// Оператор присваивания копированием
+template <typename T>
+BTree<T>& BTree<T>::operator=(const BTree& other) {
+    if (this != &other) {
+        std::unique_lock<std::shared_mutex> lock_self(tree_mutex);
+        std::shared_lock<std::shared_mutex> lock_other(other.tree_mutex);
+        
+        BTree temp(other);
+        
+        std::swap(t, temp.t);
+        std::swap(root, temp.root);
+    }
+    return *this;
+}
+
+// Конструктор перемещения
+template <typename T>
+BTree<T>::BTree(BTree&& other) noexcept : t(other.t), root(other.root) {
+    other.root = nullptr;
+    other.t = 2;
+}
+
+// Оператор присваивания перемещением
+template <typename T>
+BTree<T>& BTree<T>::operator=(BTree&& other) noexcept {
+    if (this != &other) {
+        std::unique_lock<std::shared_mutex> lock_self(tree_mutex);
+        std::unique_lock<std::shared_mutex> lock_other(other.tree_mutex);
+        
+        delete root;
+        
+        t = other.t;
+        root = other.root;
+        
+        other.root = nullptr;
+        other.t = 2;
+    }
+    return *this;
 }
 
 template <typename T>

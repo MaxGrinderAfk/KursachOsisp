@@ -19,7 +19,9 @@ private:
         ~Node();
         
         static void* operator new(std::size_t size);
-        static void operator delete(void* ptr, std::size_t size);        
+        static void operator delete(void* ptr, std::size_t size);
+
+        Node* clone() const;
     };
     
     Node* root;
@@ -42,6 +44,11 @@ private:
 public:
     BTree(int degree);
     ~BTree();
+    
+    BTree(const BTree& other);
+    BTree& operator=(const BTree& other);
+    BTree(BTree&& other) noexcept;
+    BTree& operator=(BTree&& other) noexcept;
     
     void traverse() const;
     bool search(const T& key) const;

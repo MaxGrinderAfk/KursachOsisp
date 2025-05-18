@@ -15,7 +15,6 @@
 #include <random>
 #include <sstream>
 #include <cassert>
-#include <atomic>
 #include <cstdint>
 #include <unordered_set>
 #include <unistd.h>     
