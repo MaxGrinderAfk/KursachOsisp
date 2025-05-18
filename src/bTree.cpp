@@ -27,7 +27,6 @@ void BTree<T>::Node::operator delete(void* ptr, std::size_t /*size*/) {
     SubAllocator::instance().deallocate(ptr);
 }
 
-// Вспомогательный метод для глубокого копирования узла
 template <typename T>
 typename BTree<T>::Node* BTree<T>::Node::clone() const {
     Node* newNode = new Node(isLeaf);
@@ -56,7 +55,6 @@ BTree<T>::~BTree() {
     delete root;
 }
 
-// Конструктор копирования
 template <typename T>
 BTree<T>::BTree(const BTree& other) : t(other.t) {
     std::shared_lock<std::shared_mutex> lock(other.tree_mutex);
@@ -68,7 +66,6 @@ BTree<T>::BTree(const BTree& other) : t(other.t) {
     }
 }
 
-// Оператор присваивания копированием
 template <typename T>
 BTree<T>& BTree<T>::operator=(const BTree& other) {
     if (this != &other) {
@@ -83,14 +80,12 @@ BTree<T>& BTree<T>::operator=(const BTree& other) {
     return *this;
 }
 
-// Конструктор перемещения
 template <typename T>
 BTree<T>::BTree(BTree&& other) noexcept : t(other.t), root(other.root) {
     other.root = nullptr;
     other.t = 2;
 }
 
-// Оператор присваивания перемещением
 template <typename T>
 BTree<T>& BTree<T>::operator=(BTree&& other) noexcept {
     if (this != &other) {
