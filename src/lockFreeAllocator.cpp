@@ -74,8 +74,9 @@ void SubAllocator::deallocate(void* ptr) {
 
 void SubAllocator::initialize_pool(void* memory, std::size_t block_count) {
     Block* prev = nullptr;
+    uint8_t* byte_memory = static_cast<uint8_t*>(memory);
     for (std::size_t i = 0; i < block_count; ++i) {
-        Block* block = reinterpret_cast<Block*>(static_cast<uint8_t*>(memory) + i * BLOCK_SIZE);
+        Block* block = reinterpret_cast<Block*>(byte_memory + i * BLOCK_SIZE);
         block->next.store(prev, std::memory_order_relaxed);
         prev = block;
     }
