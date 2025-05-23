@@ -5,13 +5,13 @@
 
 class SubAllocator {
 public:
-    static constexpr std::size_t BLOCK_SIZE = 64;
-    static constexpr std::size_t INITIAL_BLOCK_COUNT = 1024;
-    static constexpr int MAX_RETRY_ATTEMPTS = 100;
-
     struct Block {
         std::atomic<Block*> next;
     };
+
+    static constexpr std::size_t BLOCK_SIZE = 64 + sizeof(Block);
+    static constexpr std::size_t INITIAL_BLOCK_COUNT = 1024;
+    static constexpr int MAX_RETRY_ATTEMPTS = 100;
 
     static SubAllocator& instance();
     void* allocate();
