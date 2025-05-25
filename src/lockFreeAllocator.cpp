@@ -22,7 +22,7 @@ void* SubAllocator::allocate() {
     while (head && retryCount < MAX_RETRY_ATTEMPTS) {
         Block* next = head->next.load(std::memory_order_relaxed);
         if (free_list_head_.compare_exchange_weak(head, next, std::memory_order_acquire, std::memory_order_relaxed)) {
-            return reinterpret_cast<void*>(head);
+            return reinterpret_cast<void*>(head /*+ 1*/);
         }
         retryCount++;
         
@@ -42,7 +42,7 @@ void* SubAllocator::allocate() {
     while (head && retryCount < MAX_RETRY_ATTEMPTS) {
         Block* next = head->next.load(std::memory_order_relaxed);
         if (free_list_head_.compare_exchange_weak(head, next, std::memory_order_acquire, std::memory_order_relaxed)) {
-            return reinterpret_cast<void*>(head);
+            return reinterpret_cast<void*>(head /*+ 1*/);
         }
         retryCount++;
         
@@ -57,7 +57,7 @@ void* SubAllocator::allocate() {
 void SubAllocator::deallocate(void* ptr) {
     if (!ptr) return;
 
-    Block* block = reinterpret_cast<Block*>(ptr);
+    Block* block = reinterpret_cast<Block*>(ptr)/* - 1*/;
     Block* head = free_list_head_.load(std::memory_order_acquire);
     int retryCount = 0;
     
