@@ -1,7 +1,6 @@
 #ifndef BTREE_ALLOC_H
 #define BTREE_ALLOC_H
 
-#include "libs.h"
 #include "bTree.h"
 
 void testBasicOperations();

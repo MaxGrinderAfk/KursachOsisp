@@ -15,7 +15,7 @@ BTree<T>::Node::~Node() {
 
 template <typename T>
 void* BTree<T>::Node::operator new(std::size_t /*size*/) {
-    void* ptr = SubAllocator::instance().allocate();
+    void* ptr = SubAllocatorPool<Node>::instance().allocate();
     if (!ptr) {
         throw std::bad_alloc();
     }
@@ -24,7 +24,7 @@ void* BTree<T>::Node::operator new(std::size_t /*size*/) {
 
 template <typename T>
 void BTree<T>::Node::operator delete(void* ptr, std::size_t /*size*/) {
-    SubAllocator::instance().deallocate(ptr);
+    SubAllocatorPool<Node>::instance().deallocate(ptr);
 }
 
 template <typename T>

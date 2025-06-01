@@ -1,8 +1,7 @@
 #ifndef BTREE_H
 #define BTREE_H
 
-#include "libs.h"
-#include "lockFreeAllocator.h"
+#include "lockFreeAllocPool.h"
 
 template <typename T>
 class BTree {

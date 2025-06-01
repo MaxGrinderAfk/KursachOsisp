@@ -1,17 +1,26 @@
 #include "lockFreeAllocator.h"
 
-SubAllocator& SubAllocator::instance() {
-    static SubAllocator allocator;
-    return allocator;
+SubAllocator& SubAllocator::instance(std::size_t block_size_, std::size_t alignment) 
+{
+    std::size_t correct_block_size = std::max(block_size_, sizeof(Block));
+    std::size_t correct_allignment = alignment;
+
+    static SubAllocator instance(correct_block_size, correct_allignment);
+    return instance;
 }
 
-SubAllocator::SubAllocator() : free_list_head_(nullptr) {
+SubAllocator::SubAllocator(std::size_t block_size, std::size_t alignment)
+    :block_size_(block_size), alignment_(alignment)
+{
+    std::size_t pool_size = block_size_ * INITIAL_BLOCK_COUNT;
+    initial_memory_ = static_cast<uint8_t*>(
+        ::operator new(pool_size, std::align_val_t{alignment_}));
     initialize_pool(initial_memory_, INITIAL_BLOCK_COUNT);
 }
 
 SubAllocator::~SubAllocator() {
     for (void* pool : additional_pools_) {
-        ::operator delete(pool);
+        ::operator delete(pool, std::align_val_t{alignment_});
     }
 }
 
@@ -76,7 +85,7 @@ void SubAllocator::initialize_pool(void* memory, std::size_t block_count) {
     Block* prev = nullptr;
     uint8_t* byte_memory = static_cast<uint8_t*>(memory);
     for (std::size_t i = 0; i < block_count; ++i) {
-        Block* block = reinterpret_cast<Block*>(byte_memory + i * BLOCK_SIZE);
+        Block* block = reinterpret_cast<Block*>(byte_memory + i * block_size_);
         block->next.store(prev, std::memory_order_relaxed);
         prev = block;
     }
@@ -91,13 +100,13 @@ void SubAllocator::expand_pool() {
     }
 
     constexpr std::size_t new_block_count = INITIAL_BLOCK_COUNT; 
-    void* new_memory = ::operator new(BLOCK_SIZE * new_block_count);
+    void* new_memory = ::operator new(block_size_ * new_block_count, std::align_val_t{alignment_});
 
     additional_pools_.push_back(new_memory);
 
     Block* prev = nullptr;
     for (std::size_t i = 0; i < new_block_count; ++i) {
-        Block* block = reinterpret_cast<Block*>(static_cast<uint8_t*>(new_memory) + i * BLOCK_SIZE);
+        Block* block = reinterpret_cast<Block*>(static_cast<uint8_t*>(new_memory) + i * block_size_);
         block->next.store(prev, std::memory_order_relaxed);
         prev = block;
     }
