@@ -5,3 +5,5 @@ bTreeAlloc
 test
 *.odt
 bTreeMemAlloc.cpp
+*.pdf
+*.vsdx
