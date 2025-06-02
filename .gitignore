@@ -3,7 +3,7 @@ bTreeMemAllocProg
 bTreeAlloc
 *.txt
 test
-*.odt
+Пояснительная запискаMaksona.odt
 bTreeMemAlloc.cpp
 *.pdf
 *.vsdx
